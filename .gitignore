@@ -1,0 +1,5 @@
+.env
+*.env
+/misc
+*.sqlite
+**/microbin-data/*

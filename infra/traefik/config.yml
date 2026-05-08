@@ -1,0 +1,119 @@
+http:
+    routers:
+        immich-api-mobile:
+            rule: >
+                Host(`{{ env "IMMICH_DOMAIN" }}`)
+                && Header(`{{ env "AUTHELIA_SKIP_HEADER" }}`, `{{ env "AUTHELIA_SKIP_SECRET" }}`)
+            entryPoints:
+                - websecure
+            middlewares:
+                - chain-api-no-authelia
+            service: immich@docker
+            tls: {}
+    middlewares:
+        authelia:
+            forwardauth:
+                address: http://authelia:9091/api/verify?rd=https://{{ env "AUTH_DOMAIN" }}
+                trustForwardHeader: true
+                authResponseHeaders: Remote-User,Remote-Groups,Remote-Name,Remote-Email
+        crowdsec-bouncer:
+            plugin:
+                crowdsec-bouncer:
+                    enabled: true
+                    crowdsecMode: stream
+                    crowdsecLapiKey: {{ env "CROWDSEC_BOUNCER_API_KEY" }}
+                    crowdsecLapiHost: crowdsec:8080
+        ip-whitelist:
+            ipAllowList:
+                sourceRange:
+                    - 127.0.0.1/32
+                    - 192.168.0.0/16
+        rate-limit:
+            rateLimit:
+                average: 100
+                burst: 50
+        secure-headers:
+            headers:
+                accessControlAllowMethods:
+                    - GET
+                    - OPTIONS
+                    - PUT
+                accessControlMaxAge: 100
+                hostsProxyHeaders:
+                    - "X-Forwarded-Host"
+                browserXssFilter: true
+                contentTypeNosniff: true
+                frameDeny: true
+                # forceSTSHeader: true
+                stsIncludeSubdomains: true
+                stsPreload: true
+                stsSeconds: 31536000
+                # forceSTSHeader: true # This is a good thing but it can be tricky. Enable after everything works.
+                customFrameOptionsValue: SAMEORIGIN # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
+                referrerPolicy: "same-origin"
+                permissionsPolicy: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), vr=()"
+                customResponseHeaders:
+                    X-Robots-Tag: "none,noarchive,nosnippet,notranslate,noimageindex," # disable search engines from indexing home server
+                    server: "" # hide server info from visitors
+        api-headers:
+            headers:
+                accessControlAllowMethods:
+                    - GET
+                    - POST
+                    - PUT
+                    - DELETE
+                    - PATCH
+                    - OPTIONS
+                accessControlMaxAge: 100
+                hostsProxyHeaders:
+                    - "X-Forwarded-Host"
+                stsSeconds: 63072000
+                stsIncludeSubdomains: true
+                stsPreload: true
+                customFrameOptionsValue: SAMEORIGIN
+                contentTypeNosniff: true
+                browserXssFilter: true
+                referrerPolicy: "no-referrer" # for APIs, minimize referrer information
+                permissionsPolicy: "none" # APIs usually don’t need access to browser features
+                customResponseHeaders:
+                    server: "" # hide server info from API responses
+        chain-secure:
+            chain:
+                middlewares:
+                    - crowdsec-bouncer
+                    - rate-limit
+                    - secure-headers
+                    - authelia
+        chain-secure-ip: # This will require whitelisted IP addresses.
+            chain:
+                middlewares:
+                    - ip-whitelist
+                    - crowdsec-bouncer
+                    - rate-limit
+                    - secure-headers
+                    - authelia
+        chain-secure-no-authelia: # This is for services that can’t use Authelia, like mobile apps. Use with caution.
+            chain:
+                middlewares:
+                    - crowdsec-bouncer
+                    - rate-limit
+                    - secure-headers
+        chain-no-auth:
+            chain:
+                middlewares:
+                    - crowdsec-bouncer
+                    - rate-limit
+                    - secure-headers
+        chain-api:
+            chain:
+                middlewares:
+                    - crowdsec-bouncer
+                    - rate-limit
+                    - api-headers
+                    - authelia
+        chain-api-no-authelia:
+            chain:
+                middlewares:
+                    - crowdsec-bouncer
+                    - rate-limit
+                    - api-headers

@@ -1,0 +1,19 @@
+include:
+    # Applications
+    - apps/immich/docker-compose.yml
+
+    # Infrastructure
+    - infra/socket-proxy/docker-compose.yml
+    - infra/traefik/docker-compose.yml
+    - infra/crowdsec/docker-compose.yml
+    - infra/authelia/docker-compose.yml
+
+networks:
+    socket-proxy:
+        name: socket-proxy
+        driver: bridge
+    crowdsec:
+        driver: bridge
+    traefik:
+        name: traefik
+        driver: bridge

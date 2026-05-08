@@ -1,0 +1,29 @@
+services:
+    crowdsec:
+        container_name: crowdsec
+        image: crowdsecurity/crowdsec:latest
+        restart: unless-stopped
+        ports:
+            - "8083:8080"
+        environment:
+            DOCKER_HOST: tcp://socket-proxy:2375
+            GID: "${GID-1000}"
+            TZ: ${TZ}
+            COLLECTIONS: ${CROWDSEC_COLLECTIONS}
+        volumes:
+            - ./db:/var/lib/crowdsec/data/
+            - ./config:/etc/crowdsec/
+            - ../traefik/logs:/var/log/traefik:ro
+            - /var/log:/var/log/host/:ro
+        networks:
+            - crowdsec
+            - socket-proxy
+        depends_on:
+            - socket-proxy
+        healthcheck:
+            test: ["CMD", "cscli", "version"]
+            interval: 60s
+            timeout: 15s
+            retries: 3
+        security_opt:
+            - no-new-privileges:true

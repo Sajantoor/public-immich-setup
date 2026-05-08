@@ -1,0 +1,6 @@
+users_database.yml
+*/secrets
+notification.txt
+db.sqlite3
+/logs
+commands.md

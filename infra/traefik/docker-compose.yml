@@ -1,0 +1,41 @@
+services:
+    traefik:
+        image: traefik:latest
+        container_name: traefik
+        restart: unless-stopped
+        ports:
+            - 80:80
+            - 443:443
+        command:
+            - --certificatesresolvers.tls_resolver.acme.email=${LETSENCRYPT_EMAIL}
+        networks:
+            - socket-proxy
+            - crowdsec
+            - traefik
+        volumes:
+            - ./traefik.yml:/etc/traefik/traefik.yml:ro
+            - ./config.yml:/config/config.yml:ro
+            - ./plugins-storage:/plugins-storage
+            - ./certs:/certs
+            - ./logs:/var/log/traefik
+        environment:
+            - TZ=${TZ}
+            - DUCKDNS_TOKEN=${DUCKDNS_TOKEN}
+            - TRAEFIK_PLUGINS_STORAGE=/plugins-storage
+            - CROWDSEC_BOUNCER_API_KEY=${CROWDSEC_BOUNCER_API_KEY}
+            - AUTHELIA_SKIP_HEADER=${AUTHELIA_SKIP_HEADER}
+            - AUTHELIA_SKIP_SECRET=${AUTHELIA_SKIP_SECRET}
+            - IMMICH_DOMAIN=${IMMICH_DOMAIN}
+            - AUTH_DOMAIN=${AUTH_DOMAIN}
+        depends_on:
+            crowdsec:
+                condition: service_healthy
+            authelia:
+                condition: service_healthy
+        healthcheck:
+            test: ["CMD", "traefik", "healthcheck", "--ping"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+        security_opt:
+            - no-new-privileges:true

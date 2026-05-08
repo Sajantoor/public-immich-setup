@@ -1,0 +1,72 @@
+global:
+    checkNewVersion: true
+    sendAnonymousUsage: false
+
+api:
+    dashboard: true
+
+ping: {}
+
+entryPoints:
+    web:
+        address: ":80"
+        http:
+            redirections:
+                entryPoint:
+                    to: websecure
+                    scheme: https
+        forwardedHeaders:
+            insecure: false
+            trustedIPs:
+                - "127.0.0.1/32"
+                - "10.0.0.0/8"
+                - "172.16.0.0/12"
+                - "192.168.0.0/16"
+    websecure:
+        address: ":443"
+        forwardedHeaders:
+            insecure: false
+            trustedIPs:
+                - "127.0.0.1/32"
+                - "10.0.0.0/8"
+                - "172.16.0.0/12"
+                - "192.168.0.0/16"
+        transport:
+            respondingTimeouts:
+                readTimeout: 600s
+                idleTimeout: 600s
+providers:
+    docker:
+        endpoint: "tcp://socket-proxy:2375"
+        exposedByDefault: false
+    file:
+        directory: /config
+        watch: true
+
+experimental:
+    plugins:
+        crowdsec-bouncer:
+            moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+            version: v1.6.0
+
+certificatesResolvers:
+    tls_resolver:
+        acme:
+            storage: /certs/acme.json
+            dnsChallenge:
+                provider: duckdns
+                resolvers: ["1.1.1.1:53", "8.8.8.8:53"]
+
+log:
+    level: INFO
+    filePath: /var/log/traefik/traefik.log
+
+accessLog:
+    filePath: /var/log/traefik/access.log
+    format: json
+    filters:
+        statusCodes:
+            - "400-599"
+    fields:
+        headers:
+            defaultMode: keep
