@@ -4,7 +4,7 @@ This repository provides a template for setting up Immich on your home server an
 exposing it to the internet. This utilizes no external services\* like Cloudflare,
 TailScale, etc. It's designed to be a simple, secure, completely self-hosted solution.
 
-\*Requires a SMTP services for email notifications but this is optional
+\*Requires a SMTP services for email notifications but this is optional (https://www.authelia.com/configuration/notifications/)
 
 ## Prerequisites
 
