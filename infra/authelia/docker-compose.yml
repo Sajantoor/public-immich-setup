@@ -23,12 +23,6 @@ services:
             - IMMICH_CLIENT_ID=${IMMICH_CLIENT_ID}
             - IMMICH_CLIENT_SECRET_HASHED=${IMMICH_CLIENT_SECRET_HASHED}
             - IMMICH_DOMAIN=${IMMICH_DOMAIN}
-            - JELLYFIN_CLIENT_ID=${JELLYFIN_CLIENT_ID}
-            - JELLYFIN_CLIENT_SECRET_HASHED=${JELLYFIN_CLIENT_SECRET_HASHED}
-            - JELLYFIN_DOMAIN=${JELLYFIN_DOMAIN}
-            - SEERR_CLIENT_ID=${SEERR_CLIENT_ID}
-            - SEERR_CLIENT_SECRET_HASHED=${SEERR_CLIENT_SECRET_HASHED}
-            - SEERR_DOMAIN=${SEERR_DOMAIN}
         volumes:
             - ./config:/config
             - ./logs:/var/log/authelia
