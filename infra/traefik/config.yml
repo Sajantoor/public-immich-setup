@@ -1,5 +1,7 @@
 http:
     routers:
+        # This can be removed if you don't use the mobile app. This allows the mobile app to 
+        # bypass Authelia
         immich-api-mobile:
             rule: >
                 Host(`{{ env "IMMICH_DOMAIN" }}`)

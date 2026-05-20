@@ -37,6 +37,8 @@ Traefik -> Crowdsec (Security) -> Authelia (Authentication) -> Immich (Applicati
 1. Copy the `.env.template` file to `.env` and update the environment variables
 1. Copy the `.env.template` file in apps/immich to `apps/immich/.env` and update the environment variables
 1. Run `docker compose up -d` to start the services
+1. Update the `CROWDSEC_BOUNCER_API_KEY` in the `.env` file by running the following command, copy the key:
+   `docker exec crowdsec cscli bouncers add traefik-bouncer`
 1. Access Immich at your desired domain
 
 ## Updating the Services
