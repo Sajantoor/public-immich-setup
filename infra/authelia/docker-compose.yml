@@ -40,7 +40,6 @@ services:
             - "crowdsec.labels.type=authelia"
             - "traefik.enable=true"
             - "traefik.docker.network=traefik"
-            - "traefik.http.routers.authelia.entrypoints=websecure"
             - "traefik.http.routers.authelia.rule=Host(`auth.${DOMAIN}`)"
             - "traefik.http.routers.authelia.tls=true"
             - "traefik.http.routers.authelia.tls.certresolver=tls_resolver"
